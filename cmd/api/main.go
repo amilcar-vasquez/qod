@@ -5,10 +5,15 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
+	"os"
+	"time"
+	"flag"
+
 )
 
 type configuration struct {
-	port string
+	port int
 	env string
 }
 
@@ -17,20 +22,22 @@ type application struct {
 	logger *slog.Logger
 }
 
-func main {
+func main() {
 	//initialize configuration
 	cfg := loadConfig()
-	//initalize logger
-	logger := setupLogger()
+	//initialize logger
+	logger := setupLogger(cfg.env)
+
 	app := application{
 		config: cfg,
 		logger: logger,
 	}
-	app.serve()
-if err != nil {
-	logger.Error(err.Error())
-	os.Exit (1)
-}
+
+	err := app.serve()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 }  //end of main
 
 //loadConfig reads configuration from command line flags
@@ -38,10 +45,9 @@ func loadConfig() configuration {
     var cfg configuration
 	
 flag.IntVar(&cfg.port, "port", 4000, "API server port")
-flag.StringVar(&cfg.env,"env","development","Environment(development
-                   |staging|production)")
+flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 flag.Parse()
-	
+
 return cfg
 }
 
