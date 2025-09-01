@@ -6,8 +6,9 @@ import (
 )
 
 
-func (a *applicationDependencies)healthcheckHandler(w http.ResponseWriter,
+func (a *applicationDependencies)healthCheckHandler(w http.ResponseWriter,
                                                r *http.Request) {
+panic("Apples and Oranges")  //deliberate panic
   data := envelope {
                      "status": "available",
                      "system_info": map[string]string{
