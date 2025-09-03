@@ -6,10 +6,10 @@ import (
 )
 
 
-func (a *applicationDependencies)healthCheckHandler(w http.ResponseWriter,
+func (a *applicationDependencies)healthcheckHandler(w http.ResponseWriter,
                                                r *http.Request) {
-panic("Apples and Oranges")  //deliberate panic
-  data := envelope {
+   panic("Apples & Oranges")   // deliberate panic
+   data := envelope {
                      "status": "available",
                      "system_info": map[string]string{
                              "environment": a.config.environment,
@@ -21,3 +21,4 @@ panic("Apples and Oranges")  //deliberate panic
     a.serverErrorResponse(w, r, err)
    }
 }
+

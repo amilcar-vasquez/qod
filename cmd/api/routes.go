@@ -14,8 +14,9 @@ func (a *applicationDependencies)routes() http.Handler  {
   // handle 405
    router.MethodNotAllowed = http.HandlerFunc(a.methodNotAllowedResponse)
    // setup routes
-   router.HandlerFunc(http.MethodGet, "/v1/healthcheck", a.healthCheckHandler)
-   return router
+   router.HandlerFunc(http.MethodGet, "/v1/healthcheck", a.healthcheckHandler)
+   router.HandlerFunc(http.MethodPost, "/v1/comments", a.createCommentHandler)
+   return a.recoverPanic(router) 
   
 }
 
