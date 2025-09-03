@@ -83,6 +83,14 @@ func (a *applicationDependencies) readJSON(w http.ResponseWriter, r *http.Reques
 			return err
 		}
 	}
-
+	// almost done. Let's lastly check if there is any data after
+	// the valid JSON data. Maybe the person is trying to send
+	// multiple request bodies during one request
+	// We call decode once more to see if it gives us back anything
+	// we use a throw away struct 'struct{}{}' to hold the result
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
+		return errors.New("the body must only contain a single JSON object")
+	}
 	return nil
 }
