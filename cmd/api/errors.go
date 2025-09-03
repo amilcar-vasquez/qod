@@ -56,3 +56,12 @@ func (a *applicationDependencies)methodNotAllowedResponse(
 
    a.errorResponseJSON(w, r, http.StatusMethodNotAllowed, message)
 }
+
+// send an error response if our client messes up with a 400 (bad request)
+func (a *applicationDependencies)badRequestResponse(w http.ResponseWriter,
+                                                   r *http.Request,
+                                                   err error) {
+
+   message := fmt.Sprintf("the request is invalid: %v", err)
+   a.errorResponseJSON(w, r, http.StatusBadRequest, message)
+}
