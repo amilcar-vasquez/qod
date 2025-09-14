@@ -23,6 +23,11 @@ type serverConfig struct {
 	db          struct {
 		dsn string
 	}
+	limiter struct {
+		rps     float64
+		burst   int
+		enabled bool
+	}
 }
 
 type applicationDependencies struct {
@@ -39,6 +44,9 @@ func main() {
 		"Environment(development|staging|production)")
 	flag.StringVar(&settings.db.dsn, "db-dsn", "postgres://qod:password@localhost/qod?sslmode=disable",
 		"PostgreSQL DSN")
+	flag.Float64Var(&settings.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
+	flag.IntVar(&settings.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
+	flag.BoolVar(&settings.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))

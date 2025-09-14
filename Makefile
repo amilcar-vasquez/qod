@@ -6,6 +6,10 @@ run/api:
 	@go fmt ./...
 	@echo '-- Running application --'
 	@go run ./cmd/api
+	-limiter-burst=5
+           -limiter-rps=2
+           -limiter-enabled=true
+
 
 ## connect to db using psql
 .PHONY: db/psql
