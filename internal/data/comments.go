@@ -4,10 +4,10 @@ package data
 import (
 	"context"
 	"database/sql"
-	"github.com/amilcar-vasquez/qod/internal/validator"
+	"errors"
 	"time"
+	"github.com/amilcar-vasquez/qod/internal/validator"
 )
-
 // A CommentModel expects a connection pool
 type CommentModel struct {
 	DB *sql.DB
@@ -45,6 +45,43 @@ func (c CommentModel) Insert(comment *Comment) error {
 		&comment.ID,
 		&comment.CreatedAt,
 		&comment.Version)
+}
+
+// Get a specific comment based on its ID
+func (c CommentModel) Get(id int64) (*Comment, error) {
+	// if the id is less than 1, then it's an invalid ID
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	query := `
+		SELECT id, content, author, created_at, version
+		FROM qod
+		WHERE id = $1`
+
+	//declare a variable to hold the returned data
+	var comment Comment
+	// Set a 3-second context/timer
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := c.DB.QueryRowContext(ctx, query, id).Scan(
+		&comment.ID,
+		&comment.Content,
+		&comment.Author,
+		&comment.CreatedAt,
+		&comment.Version)
+	//check for error that may have occurred when executing the query
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	//cancel the context before returning
+	return &comment, nil
 }
 
 // Create a function that performs the validation checks

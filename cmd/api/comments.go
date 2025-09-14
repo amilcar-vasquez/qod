@@ -7,6 +7,7 @@ import (
 	// import the data package which contains the definition for Comment
 	"github.com/amilcar-vasquez/qod/internal/data"
 	"github.com/amilcar-vasquez/qod/internal/validator"
+	"errors"
 )
 
 func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
@@ -60,4 +61,35 @@ func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
 		return
 	}
 
+}
+
+func (a *applicationDependencies) displayCommentHandler(w http.ResponseWriter, r *http.Request) {
+// Get the id from the URL /v1/comments/:id so that we
+// can use it to query teh comments table. We will 
+// implement the readIDParam() function later
+	id, err := readIDParam(r)
+	if err != nil {
+		a.notFoundResponse(w, r)
+		return
+	}
+	// Use the id to retrieve the specific comment
+	comment, err := a.commentModel.Get(id)
+	if err != nil {
+		switch {
+		case err == data.ErrRecordNotFound:
+			a.notFoundResponse(w, r)
+		default:
+			a.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	// Send the comment as a JSON response
+	data := envelope{
+		"comment": comment,
+	}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
 }
