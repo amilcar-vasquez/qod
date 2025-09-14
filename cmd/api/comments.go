@@ -190,3 +190,22 @@ func (a *applicationDependencies) deleteCommentHandler(w http.ResponseWriter, r 
 		a.serverErrorResponse(w, r, err)
 	}
 }
+
+// list comments handler
+func (a *applicationDependencies) listCommentsHandler(w http.ResponseWriter, r *http.Request) {
+	// get the list of comments from the DB
+	comments, err := a.commentModel.GetAll()
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+	// send the list of comments as a JSON response
+	data := envelope{
+		"comments": comments,
+	}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+}

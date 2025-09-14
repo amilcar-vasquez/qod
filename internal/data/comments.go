@@ -143,6 +143,47 @@ func (c CommentModel) Delete(id int64) error {
 	return nil
 }
 
+// Get all the comments
+func (c CommentModel) GetAll() ([]*Comment, error) {
+	// the SQL query to be executed against the database table
+	query := `
+		SELECT id, content, author, created_at, version
+		FROM qod
+		ORDER BY id`
+	// Create a context with a 3-second timeout. No database
+	// operation should take more than 3 seconds or we will quit it
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	// execute the query against the comments database table
+	rows, err := c.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	// close the result set before the GetAll() method exits
+	defer rows.Close()
+	// initialize an empty slice to hold the comment data
+	var comments []*Comment
+	// iterate through the rows in the result set
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(
+			&comment.ID,
+			&comment.Content,
+			&comment.Author,
+			&comment.CreatedAt,
+			&comment.Version)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, &comment)
+	}
+	// check for errors after we are done iterating through the rows
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
 // Create a function that performs the validation checks
 func ValidateComment(v *validator.Validator, comment *Comment) {
 	// check if the Content field is empty
