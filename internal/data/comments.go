@@ -144,18 +144,24 @@ func (c CommentModel) Delete(id int64) error {
 }
 
 // Get all the comments
-func (c CommentModel) GetAll() ([]*Comment, error) {
+func (c CommentModel) GetAll(content string, author string) ([]*Comment, error) {
 	// the SQL query to be executed against the database table
+	// We will use PostgreSQL's builtin full-text search  feature
+	// which allows us to do natural language searches
+	// $? = '' allows for content and author to be optional
 	query := `
 		SELECT id, content, author, created_at, version
 		FROM qod
+		WHERE (to_tsvector('simple', content) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		ORDER BY id`
+
 	// Create a context with a 3-second timeout. No database
 	// operation should take more than 3 seconds or we will quit it
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	// execute the query against the comments database table
-	rows, err := c.DB.QueryContext(ctx, query)
+	rows, err := c.DB.QueryContext(ctx, query, content, author)
 	if err != nil {
 		return nil, err
 	}
