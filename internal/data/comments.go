@@ -109,6 +109,40 @@ func (c CommentModel) Update(comment *Comment) error {
 	return c.DB.QueryRowContext(ctx, query, args...).Scan(&comment.Version)
 }
 
+// delete a specific comment based on its ID
+func (c CommentModel) Delete(id int64) error {
+	// if the id is less than 1, then it's an invalid ID
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+	// the SQL query to be executed against the database table
+	query := `
+		DELETE FROM qod
+		WHERE id = $1`
+	// Create a context with a 3-second timeout. No database
+	// operation should take more than 3 seconds or we will quit it
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// ExecContext does not return any rows unlike QueryRowContext.
+	// It only returns  information about the the query execution
+	// such as how many rows were affected
+	result, err := c.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	// check how many rows were affected by the delete operation
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
+}
+
 // Create a function that performs the validation checks
 func ValidateComment(v *validator.Validator, comment *Comment) {
 	// check if the Content field is empty
