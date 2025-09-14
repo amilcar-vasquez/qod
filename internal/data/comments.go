@@ -144,13 +144,13 @@ func (c CommentModel) Delete(id int64) error {
 }
 
 // Get all the comments
-func (c CommentModel) GetAll(content string, author string, filters Filters) ([]*Comment, error) {
+func (c CommentModel) GetAll(content string, author string, filters Filters) ([]*Comment, Metadata, error) {
 	// the SQL query to be executed against the database table
 	// We will use PostgreSQL's builtin full-text search  feature
 	// which allows us to do natural language searches
 	// $? = '' allows for content and author to be optional
 	query := `
-		SELECT id, content, author, created_at, version
+		SELECT COUNT(*) OVER(), id, content, author, created_at, version
 		FROM qod
 		WHERE (to_tsvector('simple', content) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -164,31 +164,37 @@ func (c CommentModel) GetAll(content string, author string, filters Filters) ([]
 	// execute the query against the comments database table
 	rows, err := c.DB.QueryContext(ctx, query, content, author, filters.limit(), filters.offset())
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	// close the result set before the GetAll() method exits
 	defer rows.Close()
+	totalRecords := 0
 	// initialize an empty slice to hold the comment data
 	var comments []*Comment
 	// iterate through the rows in the result set
 	for rows.Next() {
 		var comment Comment
-		err := rows.Scan(
+		err := rows.Scan(&totalRecords,
 			&comment.ID,
 			&comment.Content,
 			&comment.Author,
 			&comment.CreatedAt,
 			&comment.Version)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		comments = append(comments, &comment)
 	}
 	// check for errors after we are done iterating through the rows
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
-	return comments, nil
+	//Create the metadata
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	// return the slice of comments
+	// along with the metadata
+	return comments, metadata, nil
+	//
 }
 
 // Create a function that performs the validation checks
