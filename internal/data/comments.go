@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/amilcar-vasquez/qod/internal/validator"
 	"time"
 )
@@ -149,13 +150,13 @@ func (c CommentModel) GetAll(content string, author string, filters Filters) ([]
 	// We will use PostgreSQL's builtin full-text search  feature
 	// which allows us to do natural language searches
 	// $? = '' allows for content and author to be optional
-	query := `
+	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER(), id, content, author, created_at, version
 		FROM qod
 		WHERE (to_tsvector('simple', content) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '')
-		ORDER BY id
-		LIMIT $3 OFFSET $4`
+		 ORDER BY %s %s, id ASC 
+        LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
 
 	// Create a context with a 3-second timeout. No database
 	// operation should take more than 3 seconds or we will quit it
