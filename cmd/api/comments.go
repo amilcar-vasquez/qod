@@ -7,7 +7,6 @@ import (
 	// import the data package which contains the definition for Comment
 	"github.com/amilcar-vasquez/qod/internal/data"
 	"github.com/amilcar-vasquez/qod/internal/validator"
-	"errors"
 )
 
 func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
@@ -64,10 +63,10 @@ func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
 }
 
 func (a *applicationDependencies) displayCommentHandler(w http.ResponseWriter, r *http.Request) {
-// Get the id from the URL /v1/comments/:id so that we
-// can use it to query teh comments table. We will 
-// implement the readIDParam() function later
-	id, err := readIDParam(r)
+	// Get the id from the URL /v1/comments/:id so that we
+	// can use it to query teh comments table. We will
+	// implement the readIDParam() function later
+	id, err := a.readIDParam(r)
 	if err != nil {
 		a.notFoundResponse(w, r)
 		return

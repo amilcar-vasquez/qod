@@ -1,9 +1,8 @@
 // Filename: internal/data/errors.go
-package data 
+package data
 
 import (
-    "errors"
+	"errors"
 )
 
 var ErrRecordNotFound = errors.New("record not found")
-

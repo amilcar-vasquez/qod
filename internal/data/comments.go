@@ -5,9 +5,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 	"github.com/amilcar-vasquez/qod/internal/validator"
+	"time"
 )
+
 // A CommentModel expects a connection pool
 type CommentModel struct {
 	DB *sql.DB
