@@ -92,3 +92,70 @@ func (a *applicationDependencies) displayCommentHandler(w http.ResponseWriter, r
 		return
 	}
 }
+
+// update handler
+func (a *applicationDependencies) updateCommentHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the id from the URL /v1/comments/:id so that we
+	// can use it to query teh comments table. We will
+	// implement the readIDParam() function later
+	id, err := a.readIDParam(r)
+	if err != nil {
+		a.notFoundResponse(w, r)
+		return
+	}
+	// Use the id to retrieve the specific comment
+	comment, err := a.commentModel.Get(id)
+	if err != nil {
+		switch {
+		case err == data.ErrRecordNotFound:
+			a.notFoundResponse(w, r)
+		default:
+			a.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// create a struct to hold a comment
+	var incomingData struct {
+		Content *string `json:"content"`
+		Author  *string `json:"author"`
+	}
+
+	// perform the decoding
+	err = a.readJSON(w, r, &incomingData)
+	if err != nil {
+		a.badRequestResponse(w, r, err)
+		return
+	}
+
+	//check which fields need to be updated
+	if incomingData.Content != nil {
+		comment.Content = *incomingData.Content
+	}
+	if incomingData.Author != nil {
+		comment.Author = *incomingData.Author
+	}
+
+	// Before we write the updates to the DB let's validate
+	v := validator.New()
+	data.ValidateComment(v, comment)
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// perform the update
+	err = a.commentModel.Update(comment)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+	data := envelope{
+		"comment": comment,
+	}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+}
