@@ -6,8 +6,10 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/amilcar-vasquez/qod/internal/data"
@@ -26,6 +28,9 @@ type serverConfig struct {
 		rps     float64
 		burst   int
 		enabled bool
+	}
+	cors struct {
+		trustedOrigins []string
 	}
 }
 
@@ -46,7 +51,22 @@ func main() {
 	flag.Float64Var(&settings.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&settings.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&settings.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)",
+		func(val string) error {
+			settings.cors.trustedOrigins = strings.Fields(val)
+			return nil
+		})
 	flag.Parse()
+	//print out flags values
+	fmt.Printf(`Starting server with config:
+	port: %d
+	environment: %s
+	db-dsn: %s
+	limiter-rps: %.2f
+	limiter-burst: %d
+	limiter-enabled: %t
+	cors-trusted-origins: %v
+	`, settings.port, settings.environment, settings.db.dsn, settings.limiter.rps, settings.limiter.burst, settings.limiter.enabled, settings.cors.trustedOrigins)
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 

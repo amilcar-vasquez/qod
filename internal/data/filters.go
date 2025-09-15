@@ -9,7 +9,7 @@ import (
 // and eventually the fields related to sorting.
 type Filters struct {
 	Page         int      // which page number does the client want
-	PageSize     int      // how records per page
+	PageSize     int      // how many records per page
 	Sort         string   // which column do we want to sort by
 	SortSafelist []string // list of columns that are allowed to be sorted by
 }

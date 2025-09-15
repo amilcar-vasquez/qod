@@ -23,5 +23,6 @@ func (a *applicationDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/quotes/:id", a.deleteQuoteHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/quotes", a.listQuotesHandler)
 
-	return a.recoverPanic(a.rateLimit(router))
+	// Chain: CORS -> RateLimit -> RecoverPanic
+	return a.recoverPanic(a.rateLimit(a.enableCORS(router)))
 }

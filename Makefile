@@ -5,10 +5,10 @@ run/api:
 	@echo '-- Running go fmt --'
 	@go fmt ./...
 	@echo '-- Running application --'
-	@go run ./cmd/api
-	-limiter-burst=5
-           -limiter-rps=2
-           -limiter-enabled=true
+	@go run ./cmd/api  -limiter-burst=5 \
+           -limiter-rps=2 \
+           -limiter-enabled=true \
+           -cors-trusted-origins='http://localhost:9000 http://localhost:9001'
 
 
 ## connect to db using psql
@@ -28,3 +28,4 @@ db/migrations/new:
 db/migrations/up:
 	@echo 'Running up migrations...'
 	migrate -path ./migrations -database ${QOD_DB_DSN} up
+
