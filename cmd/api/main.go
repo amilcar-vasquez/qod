@@ -6,11 +6,12 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"github.com/amilcar-vasquez/qod/internal/data"
-	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
 	"time"
+
+	"github.com/amilcar-vasquez/qod/internal/data"
+	_ "github.com/lib/pq"
 )
 
 const appVersion = "2.0.0"
@@ -29,9 +30,9 @@ type serverConfig struct {
 }
 
 type applicationDependencies struct {
-	config       serverConfig
-	logger       *slog.Logger
-	commentModel *data.CommentModel
+	config     serverConfig
+	logger     *slog.Logger
+	quoteModel *data.QuoteModel
 }
 
 func main() {
@@ -61,9 +62,9 @@ func main() {
 	logger.Info("database connection pool established")
 
 	appInstance := &applicationDependencies{
-		config:       settings,
-		logger:       logger,
-		commentModel: &data.CommentModel{DB: db},
+		config:     settings,
+		logger:     logger,
+		quoteModel: &data.QuoteModel{DB: db},
 	}
 
 	err = appInstance.serve()

@@ -2,8 +2,9 @@
 package main
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func (a *applicationDependencies) routes() http.Handler {
@@ -16,11 +17,11 @@ func (a *applicationDependencies) routes() http.Handler {
 	router.MethodNotAllowed = http.HandlerFunc(a.methodNotAllowedResponse)
 	// setup routes
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", a.healthcheckHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/comments", a.createCommentHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/comments/:id", a.displayCommentHandler)
-	router.HandlerFunc(http.MethodPatch, "/v1/comments/:id", a.updateCommentHandler)
-	router.HandlerFunc(http.MethodDelete, "/v1/comments/:id", a.deleteCommentHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/comments", a.listCommentsHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/quotes", a.createQuoteHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/quotes/:id", a.displayQuoteHandler)
+	router.HandlerFunc(http.MethodPatch, "/v1/quotes/:id", a.updateQuoteHandler)
+	router.HandlerFunc(http.MethodDelete, "/v1/quotes/:id", a.deleteQuoteHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/quotes", a.listQuotesHandler)
 
 	return a.recoverPanic(a.rateLimit(router))
 }
