@@ -81,3 +81,12 @@ func (a *applicationDependencies) rateLimitExceededResponse(w http.ResponseWrite
 	message := "rate limit exceeded"
 	a.errorResponseJSON(w, r, http.StatusTooManyRequests, message)
 }
+
+// send an error response if we have an edit conflict status 409
+func (a *applicationDependencies) editConflictResponse(w http.ResponseWriter,
+	r *http.Request) {
+
+	message := "unable to update the record due to an edit conflict, please try again"
+	a.errorResponseJSON(w, r, http.StatusConflict, message)
+
+}

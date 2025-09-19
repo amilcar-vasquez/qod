@@ -38,6 +38,7 @@ type applicationDependencies struct {
 	config     serverConfig
 	logger     *slog.Logger
 	quoteModel *data.QuoteModel
+	userModel  *data.UserModel
 }
 
 func main() {
@@ -85,6 +86,7 @@ func main() {
 		config:     settings,
 		logger:     logger,
 		quoteModel: &data.QuoteModel{DB: db},
+		userModel:  &data.UserModel{DB: db},
 	}
 
 	err = appInstance.serve()

@@ -1,3 +1,4 @@
+include .envrc
 ## run/api: run go fmt, then run the cmd/api application
 
 .PHONY: run/api
@@ -8,13 +9,13 @@ run/api:
 	@go run ./cmd/api  -limiter-burst=5 \
            -limiter-rps=2 \
            -limiter-enabled=true \
-           -cors-trusted-origins='http://localhost:9000 http://localhost:9001'
+           -cors-trusted-origins='http://localhost:9000 http://localhost:9001' \
 
 
 ## connect to db using psql
 .PHONY: db/psql
 db/psql:
-	@psql ${COMMENTS_DB_DSN}
+	@psql ${QOD_DB_DSN}
 
 ## db/migrations/new name=$1: create a new database migration
 .PHONY: db/migrations/new
